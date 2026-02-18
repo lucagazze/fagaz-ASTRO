@@ -24,7 +24,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Mail Options
     const mailOptions = {
       from: `"Web Fagaz" <${import.meta.env.SMTP_USER}>`, // Sender address
-      to: 'lucagazze1@gmail.com', // List of receivers (can be env var too)
+      to: 'lucagazze1@gmail.com, bruno.gazze@fagazsa.com', // List of receivers
       replyTo: email,
       subject: `Nuevo Contacto Web: ${name} - ${service || 'General'}`,
       text: `

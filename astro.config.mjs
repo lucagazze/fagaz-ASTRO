@@ -11,4 +11,18 @@ export default defineConfig({
   output: 'server',
   adapter: vercel(),
   integrations: [tailwind(), sitemap()],
+  vite: {
+    build: {
+      cssCodeSplit: true,
+      assetsInlineLimit: 4096,
+      rollupOptions: {
+        output: {
+          manualChunks: undefined,
+        },
+      },
+    },
+    css: {
+      devSourcemap: false,
+    },
+  },
 });

@@ -68,12 +68,7 @@ import limpieza6 from '../assets/images/limpieza6.jpg';
                 <div class="bg-background-light rounded-2xl p-8 lg:p-10 shadow-lg border border-gray-100 flex flex-col justify-center order-1 lg:order-2">
                     <h3 class="text-2xl font-bold text-[#111118] mb-2">¿Listo para optimizar sus operaciones?</h3>
                     <p class="text-[#625e87] mb-8">Complete el formulario y nos pondremos en contacto a la brevedad.</p>
-                    <form action="https://api.web3forms.com/submit" method="POST" class="space-y-5">
-                        <input type="hidden" name="access_key" value="392a0797-bcaa-4eb1-8b30-1b03db06d3ec">
-                        <input type="hidden" name="subject" value="Nuevo mensaje desde Contacto - Fagaz Web">
-                        <input type="hidden" name="from_name" value="Fagaz Web">
-                        <input type="hidden" name="redirect" value="https://fagazsa.com/gracias">
-
+                    <form id="contact-form-page" class="space-y-5">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1" for="name">Nombre Completo</label>
@@ -106,6 +101,9 @@ import limpieza6 from '../assets/images/limpieza6.jpg';
                             <label class="block text-sm font-medium text-gray-700 mb-1" for="message">Mensaje</label>
                             <textarea class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary py-3 px-4" id="message" name="message" placeholder="¿Cómo podemos ayudarlo?" rows="4" required></textarea>
                         </div>
+                        
+                        <div id="form-message-page" class="hidden rounded-lg p-4 text-sm"></div>
+
                         <div class="pt-2">
                             <Button type="submit" variant="primary" class="w-full py-4 text-base shadow-lg hover:shadow-xl hover:-translate-y-0.5">
                                 Enviar Mensaje
@@ -116,6 +114,63 @@ import limpieza6 from '../assets/images/limpieza6.jpg';
                             Al enviar este formulario, acepta nuestra política de privacidad y términos de servicio.
                         </p>
                     </form>
+
+                    <script>
+                        const formPage = document.getElementById('contact-form-page') as HTMLFormElement;
+                        const messageDivPage = document.getElementById('form-message-page');
+                        const submitButtonPage = formPage?.querySelector('button[type="submit"]');
+
+                        if (formPage) {
+                            formPage.addEventListener('submit', async (e) => {
+                                e.preventDefault();
+                                
+                                // Disable button and show loading state
+                                if (submitButtonPage) {
+                                    (submitButtonPage as HTMLButtonElement).disabled = true;
+                                    const originalText = submitButtonPage.innerHTML;
+                                    submitButtonPage.innerHTML = 'Enviando...';
+                                }
+                                if (messageDivPage) messageDivPage.classList.add('hidden');
+
+                                const formData = new FormData(formPage);
+                                const data = Object.fromEntries(formData);
+
+                                try {
+                                    const response = await fetch('/api/send-mail', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify(data),
+                                    });
+
+                                    const result = await response.json();
+
+                                    if (response.ok) {
+                                        if (messageDivPage) {
+                                            messageDivPage.textContent = result.message || '¡Mensaje enviado con éxito!';
+                                            messageDivPage.className = 'mt-4 rounded-lg p-4 text-sm bg-green-100 text-green-700 block';
+                                        }
+                                        formPage.reset();
+                                    } else {
+                                        throw new Error(result.message || 'Error al enviar el mensaje');
+                                    }
+                                } catch (error) {
+                                    console.error('Error:', error);
+                                    if (messageDivPage) {
+                                        messageDivPage.textContent = error instanceof Error ? error.message : 'Ocurrió un error inesperado. Por favor, intente nuevamente.';
+                                        messageDivPage.className = 'mt-4 rounded-lg p-4 text-sm bg-red-100 text-red-700 block';
+                                    }
+                                } finally {
+                                    // Re-enable button
+                                    if (submitButtonPage) {
+                                        (submitButtonPage as HTMLButtonElement).disabled = false;
+                                        submitButtonPage.innerHTML = 'Enviar Mensaje <span class="material-symbols-outlined text-sm ml-2">send</span>';
+                                    }
+                                }
+                            });
+                        }
+                    </script>
                 </div>
             </div>
         </div>
